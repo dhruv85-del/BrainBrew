@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dhruv's Advanced Quiz App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Confetti canvas (used after high-score) -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Top-level container -->
+  <div class="container">
+
+    <!-- HEADER / NAV -->
+    <header class="app-header">
+      <div class="brand">
+        <img src="images/logo.jpg" alt="Quiz Logo" class="brand-logo" />
+        <div>
+          <h1 class="brand-title">BrainBrew</h1>
+          <div class="small-muted">Practice • Learn • Improve</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div id="user-area" class="user-area">
+          <button id="btn-open-login" class="ghost-btn">Login / Signup</button>
+        </div>
+        <button id="btn-open-leaderboard" class="ghost-btn">Leaderboard</button>
+        <button id="theme-toggle" class="ghost-btn" aria-label="Toggle theme">🌙</button>
+      </div>
+    </header>
+
+    <!-- MAIN: CATEGORY & CONTROLS -->
+    <main id="main-area">
+
+      <!-- LOGIN / SIGNUP MODAL (hidden by default) -->
+      <div id="login-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="login-title">
+        <div class="modal-card">
+          <button class="modal-close" id="login-close">&times;</button>
+          <h3 id="login-title">Login or Sign up</h3>
+
+          <div class="auth-tabs">
+            <button id="tab-login" class="tab active">Login</button>
+            <button id="tab-signup" class="tab">Signup</button>
+          </div>
+
+          <form id="login-form" class="auth-form">
+            <label>Username
+              <input type="text" id="login-username" required />
+            </label>
+            <label>Password
+              <input type="password" id="login-password" required />
+            </label>
+            <div class="auth-actions">
+              <button type="submit" class="primary">Login</button>
+            </div>
+          </form>
+
+          <form id="signup-form" class="auth-form hidden">
+            <label>Choose username
+              <input type="text" id="signup-username" required />
+            </label>
+            <label>Password
+              <input type="password" id="signup-password" required />
+            </label>
+            <div class="auth-actions">
+              <button type="submit" class="primary">Create account</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- LEADERBOARD MODAL -->
+      <div id="leaderboard-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="leaderboard-title">
+        <div class="modal-card">
+          <button class="modal-close" id="leaderboard-close">&times;</button>
+          <h3 id="leaderboard-title">Leaderboard</h3>
+          <ol id="leaderboard-list" class="leaderboard-list">
+            <!-- JS fills top scores -->
+          </ol>
+          <div style="text-align:center; margin-top:12px;">
+            <button id="leaderboard-refresh" class="ghost-btn">Refresh</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOP CONTROLS -->
+      <section id="controls" class="controls">
+        <div class="control-left">
+          <label class="control-label">Difficulty:</label>
+          <select id="difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </div>
+
+        <div class="control-right">
+          <div class="lifelines">
+            <button id="lifeline-5050" class="ghost-btn" title="Remove 2 wrong options">50-50</button>
+            <button id="lifeline-skip" class="ghost-btn" title="Skip this question">Skip</button>
+            <button id="lifeline-hint" class="ghost-btn" title="Show a hint">Hint</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATEGORY CARDS -->
+      <section id="category-section" class="section">
+        <h2 class="section-title">Pick a Category</h2>
+        <div class="categories" id="categories">
+          <!-- Buttons with data-category attribute and images -->
+          <button class="category-card" data-category="java">
+            <img src="images/java.jpeg" alt="Java" />
+            <div class="cat-title">Java</div>
+            <div class="cat-sub">15 Questions</div>
+          </button>
+
+          <button class="category-card" data-category="dsa">
+            <img src="images/dsa.jpg" alt="DSA" />
+            <div class="cat-title">DSA</div>
+            <div class="cat-sub">15 Questions</div>
+          </button>
+
+          <button class="category-card" data-category="web">
+            <img src="images/web.jpg" alt="Web Dev" />
+            <div class="cat-title">Web Development</div>
+            <div class="cat-sub">15 Questions</div>
+          </button>
+        </div>
+
+        <div class="start-area">
+          <button id="btn-start" class="primary" disabled>Start Quiz</button>
+        </div>
+      </section>
+
+      <!-- QUIZ SECTION -->
+      <section id="quiz-section" class="hidden section">
+        <div class="quiz-topbar">
+          <button id="btn-back" class="ghost-btn">← Categories</button>
+          <div class="progress-wrap">
+            <div class="progress-meta">
+              <span id="q-count">Question 0 of 0</span> • <span id="time-taken">00:00</span>
+            </div>
+            <div class="progress-container">
+              <div id="progress-bar" class="progress-bar"></div>
+            </div>
+          </div>
+          <div class="timer-wrap">
+            <div id="timer" class="timer">30</div>
+          </div>
+        </div>
+
+        <div class="quiz-card">
+          <div id="q-category" class="small-muted">Category: —</div>
+          <h2 id="question" class="question">Question text</h2>
+
+          <div id="options" class="options" role="list">
+            <!-- JS will render option buttons with class "option" -->
+          </div>
+
+          <div class="quiz-actions">
+            <button id="btn-next" class="primary" disabled>Next</button>
+            <button id="btn-review" class="ghost-btn">Review Answers</button>
+            <button id="btn-submit" class="ghost-btn">Submit Quiz</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- REVIEW SECTION -->
+      <section id="review-section" class="hidden section">
+        <h2 class="section-title">Review Answers</h2>
+        <div id="review-list" class="review-list">
+          <!-- Each entry: question, selected, correct, timeTaken -->
+        </div>
+        <div class="actions">
+          <button id="btn-close-review" class="primary">Close Review</button>
+        </div>
+      </section>
+
+      <!-- RESULT / REPORT -->
+      <section id="result-section" class="hidden section">
+        <h2 class="section-title">Your Result</h2>
+        <div class="result-card">
+          <div id="score-text" class="score-text">Score: 0 / 0</div>
+          <div id="percent-text" class="percent-text">0%</div>
+          <div id="remark-text" class="remark-text">Remark</div>
+
+          <div id="badges" class="badges">
+            <!-- earned badges shown here -->
+          </div>
+
+          <div id="detailed-report" class="detailed-report">
+            <!-- breakdown, time-per-question, difficulty summary -->
+          </div>
+
+          <div class="result-actions">
+            <button id="btn-restart" class="primary">Restart</button>
+            <button id="btn-home" class="ghost-btn">Back to Categories</button>
+            <button id="btn-save-score" class="ghost-btn">Save to Leaderboard</button>
+            <button id="btn-download-report" class="ghost-btn">Download Report</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="app-footer">
+      <small>Built with  — Dhruv's Quiz App</small>
+    </footer>
+  </div>
+
+  <!-- Script -->
+  <script src="script.js"></script>
+</body>
+</html>
+
